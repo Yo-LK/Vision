@@ -18,8 +18,7 @@ print("="*60)
 
 # **[단계 1] 이미지 불러오기**
 print("[단계 1] 이미지 불러오기...")
-# img = cv2.imread('커피잔_이미지_파일_경로.jpg') # 사용자의 파일 경로
-img = cv2.imread('0319/coffee_cup.jpg') # 생성한 시연용 이미지
+img = cv2.imread('0319/coffee cup.JPG') 
 
 if img is None: # 이미지가 제대로 불러와졌는지 확인
     print("이미지를 불러올 수 없습니다. 경로를 확인하세요.")
@@ -36,9 +35,15 @@ fgdModel = np.zeros((1, 65), np.float64) # 전경 모델 (1x65, float64)
 print("[단계 3] 초기 사각형 영역 설정...")
 # 초기 사각형 영역은 (x, y, width, height) 형식으로 설정
 # 시연용 이미지의 중앙 커피잔을 감싸는 영역
-# (200, 300) 위치에서 (width=600, height=500) 크기
-rect = (200, 300, 600, 500) 
-print(f"설정된 사각형 영역 (x, y, width, height): {rect}")
+# 이미지의 높이(h)와 너비(w)를 가져옵니다.
+h, w = img.shape[:2]
+
+# 이미지 전체에서 테두리 10픽셀 정도만 제외하고 사각형을 잡습니다.
+# (x, y, width, height) 순서입니다.
+rect = (10, 10, w - 20, h - 20) 
+
+print(f"이미지 크기: {w}x{h}")
+print(f"설정된 사각형 영역: {rect}")
 
 # **[단계 4] cv.grabCut()을 사용하여 대화식 분할 수행**
 print("[단계 4] cv.grabCut() 수행 (사각형 영역 기준)...")
@@ -88,12 +93,9 @@ plt.axis('off')
 
 # (2) GrabCut 마스크 (4단계 분류)
 plt.subplot(1, 3, 2)
-# 컬러맵을 사용하여 4가지 상태를 시각화
-im_mask = plt.imshow(mask, cmap=cmap_custom, norm=norm_custom)
-# 범례(colorbar) 추가
-cbar = plt.colorbar(im_mask, ticks=[0, 1, 2, 3], orientation='horizontal', shrink=0.7) # 컬러바 추가
-cbar.ax.set_xticklabels(['BGD (0)', 'FGD (1)', 'PR BGD (2)', 'PR FGD (3)']) # 컬러바 레이블 설정
-plt.title('GrabCut Raw Mask (4 Levels)') # 마스크의 4단계 분류 시각화
+# mask(0~3 값) 대신, 우리가 배경을 지우려고 만든 mask2(0 또는 1)를 출력합니다.
+plt.imshow(mask2, cmap='gray') 
+plt.title('Final Binary Mask (Black/White)')
 plt.axis('off')
 
 # (3) 배경 제거 이미지 (최종 객체 추출 결과)
